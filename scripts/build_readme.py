@@ -40,8 +40,11 @@ TEXT = {
         "switch": '<b>English</b> | <a href="README_zh.md">简体中文</a>',
         "tagline": "Where do post-training signals come from?",
         "intro": (
-            "A curated list of **data for LLM post-training**: datasets, data synthesis methods, and the "
-            "environments that generate them. The list is organized into modules and will grow over time."
+            "LLM post-training mainly consumes three kinds of signals: **demonstrations** (what a good response "
+            "looks like), **preferences** (which response is better), and **rewards / verification** (how good an "
+            "outcome is). This repository focuses on works about ***how to obtain these signals*** (e.g. tasks, "
+            "environments, verifiers, judges); it does not cover works about *how to consume them* (e.g. training "
+            "algorithms)."
         ),
         "contents": "Contents",
         "modules": "Modules",
@@ -60,8 +63,9 @@ TEXT = {
         "switch": '<a href="README.md">English</a> | <b>简体中文</b>',
         "tagline": "后训练的信号从哪里来？",
         "intro": (
-            "一个关于**大模型后训练数据**的精选列表：涵盖数据集、数据合成方法，以及用于产生数据的环境。"
-            "列表按模块组织，并将持续扩充。"
+            "大语言模型后训练主要消耗三类信号：**示范**（好的回答长什么样）、**偏好**（哪个回答更好）、"
+            "**奖励/验证**（结果有多好）。本仓库专注于收录关于***如何获得这些信号***的工作（如任务、环境、"
+            "验证器、评判器等）；不收录*如何消费这些信号*的工作（如训练算法等）。"
         ),
         "contents": "目录",
         "modules": "模块",

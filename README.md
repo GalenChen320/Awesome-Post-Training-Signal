@@ -13,7 +13,7 @@
 
 </div>
 
-A curated list of **data for LLM post-training**: datasets, data synthesis methods, and the environments that generate them. The list is organized into modules and will grow over time.
+LLM post-training mainly consumes three kinds of signals: **demonstrations** (what a good response looks like), **preferences** (which response is better), and **rewards / verification** (how good an outcome is). This repository focuses on works about ***how to obtain these signals*** (e.g. tasks, environments, verifiers, judges); it does not cover works about *how to consume them* (e.g. training algorithms).
 
 ## Contents
 
