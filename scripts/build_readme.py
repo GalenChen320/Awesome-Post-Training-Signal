@@ -44,7 +44,7 @@ TEXT = {
         ),
         "contents": "Contents",
         "modules": "Modules",
-        "header": "| Name | Domain | Date | Venue | Scale | Links | Summary |",
+        "header": "| Name | Domain | Date | Links | Summary |",
         "contrib_title": "Contributing",
         "contrib": (
             "Contributions are welcome! Please edit the JSON files under [`data/`](data/) and run "
@@ -63,7 +63,7 @@ TEXT = {
         ),
         "contents": "目录",
         "modules": "模块",
-        "header": "| 名称 | 领域 | 日期 | 发表 | 规模 | 链接 | 简介 |",
+        "header": "| 名称 | 领域 | 日期 | 链接 | 简介 |",
         "contrib_title": "贡献",
         "contrib": (
             "欢迎贡献！请编辑 [`data/`](data/) 下的 JSON 文件，并运行 `python3 scripts/build_readme.py` "
@@ -88,8 +88,7 @@ def row(e: dict, lang: str) -> str:
         links.append(f"[![Code](https://img.shields.io/badge/Code-black?logo=github)]({e['code']})")
     if e.get("data"):
         links.append(f"[![Data](https://img.shields.io/badge/Data-yellow?logo=huggingface)]({e['data']})")
-    scale = e.get(f"scale_{lang}") or "-"
-    cells = [name, domain, e["date"], esc(e["venue"]), esc(scale), " ".join(links), esc(e[f"summary_{lang}"])]
+    cells = [name, domain, e["date"], " ".join(links), esc(e[f"summary_{lang}"])]
     return "| " + " | ".join(cells) + " |"
 
 
@@ -123,7 +122,7 @@ def build(lang: str) -> str:
             f"> {t['note']}",
             "",
             t["header"],
-            "|---|---|---|---|---|---|---|",
+            "|---|---|---|---|---|",
         ]
         out += [row(e, lang) for e in entries]
         out.append("")

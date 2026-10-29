@@ -13,10 +13,7 @@ Thanks for helping improve **Awesome Post-Training Data**!
   "title": "Full Paper Title",
   "arxiv": "2601.05808",
   "date": "2026-01",
-  "venue": "arXiv",
   "domain": "Tool & API",
-  "scale_en": "191 envs",
-  "scale_zh": "191 个环境",
   "code": "https://github.com/...",
   "data": "https://huggingface.co/...",
   "summary_en": "One sentence (<= 25 words) on how the data/environment is built.",
@@ -25,9 +22,8 @@ Thanks for helping improve **Awesome Post-Training Data**!
 ```
 
    - `date`: month of the **first** arXiv version (`YYYY-MM`).
-   - `venue`: published venue (e.g. `ICML 2026`), otherwise `arXiv`.
    - `domain`: one of `Tool & API`, `SWE`, `Terminal`, `Web & GUI`, `Game & Embodied`, `Reasoning`.
-   - Leave `code`, `data`, `scale_*` as `""` if unavailable.
+   - Leave `code`, `data` as `""` if unavailable.
 3. Regenerate the READMEs (do **not** edit `README.md` / `README_zh.md` by hand):
 
 ```bash
@@ -46,7 +42,7 @@ python3 scripts/build_readme.py
 
 # 贡献指南
 
-1. 在 [`data/`](data/) 下找到对应模块的 JSON 文件，按上方字段格式追加条目（`date` 为 arXiv 首版月份，无正式发表时 `venue` 填 `arXiv`，缺失字段留空字符串）。
+1. 在 [`data/`](data/) 下找到对应模块的 JSON 文件，按上方字段格式追加条目（`date` 为 arXiv 首版月份，缺失的 `code`/`data` 留空字符串）。
 2. 运行 `python3 scripts/build_readme.py` 重新生成中英文 README，**不要**手动修改 README。
 3. 提交 Pull Request。
 
