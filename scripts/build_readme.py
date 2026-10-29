@@ -37,7 +37,8 @@ DOMAIN_ZH = {
 TEXT = {
     "en": {
         "file": "README.md",
-        "switch": "**English** | [简体中文](README_zh.md)",
+        "switch": '<b>English</b> | <a href="README_zh.md">简体中文</a>',
+        "tagline": "Where do post-training signals come from?",
         "intro": (
             "A curated list of **data for LLM post-training**: datasets, data synthesis methods, and the "
             "environments that generate them. The list is organized into modules and will grow over time."
@@ -56,7 +57,8 @@ TEXT = {
     },
     "zh": {
         "file": "README_zh.md",
-        "switch": "[English](README.md) | **简体中文**",
+        "switch": '<a href="README.md">English</a> | <b>简体中文</b>',
+        "tagline": "后训练的信号从哪里来？",
         "intro": (
             "一个关于**大模型后训练数据**的精选列表：涵盖数据集、数据合成方法，以及用于产生数据的环境。"
             "列表按模块组织，并将持续扩充。"
@@ -94,12 +96,22 @@ def row(e: dict, lang: str) -> str:
 
 def build(lang: str) -> str:
     t = TEXT[lang]
+    total = sum(len(json.loads((ROOT / "data" / m["file"]).read_text(encoding="utf-8"))) for m in MODULES)
     out = [
-        "# Awesome Post-Training Data",
+        '<div align="center">',
         "",
-        "[![Awesome](https://awesome.re/badge.svg)](https://awesome.re)",
+        "<h1>Awesome Post-Training Signal</h1>",
         "",
-        t["switch"],
+        f"<p><i>{t['tagline']}</i></p>",
+        "",
+        '<a href="https://awesome.re"><img src="https://awesome.re/badge.svg" alt="Awesome"></a>',
+        f'<img src="https://img.shields.io/badge/papers-{total}-blue" alt="Papers">',
+        '<a href="LICENSE"><img src="https://img.shields.io/badge/license-CC0%201.0-lightgrey" alt="License"></a>',
+        '<a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen" alt="PRs Welcome"></a>',
+        "",
+        f"<p>{t['switch']}</p>",
+        "",
+        "</div>",
         "",
         t["intro"],
         "",

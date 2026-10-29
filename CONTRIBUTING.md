@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping improve **Awesome Post-Training Data**!
+Thanks for helping improve **Awesome Post-Training Signal**!
 
 ## How to add an entry
 

@@ -1,8 +1,17 @@
-# Awesome Post-Training Data
+<div align="center">
 
-[![Awesome](https://awesome.re/badge.svg)](https://awesome.re)
+<h1>Awesome Post-Training Signal</h1>
 
-[English](README.md) | **简体中文**
+<p><i>后训练的信号从哪里来？</i></p>
+
+<a href="https://awesome.re"><img src="https://awesome.re/badge.svg" alt="Awesome"></a>
+<img src="https://img.shields.io/badge/papers-68-blue" alt="Papers">
+<a href="LICENSE"><img src="https://img.shields.io/badge/license-CC0%201.0-lightgrey" alt="License"></a>
+<a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen" alt="PRs Welcome"></a>
+
+<p><a href="README.md">English</a> | <b>简体中文</b></p>
+
+</div>
 
 一个关于**大模型后训练数据**的精选列表：涵盖数据集、数据合成方法，以及用于产生数据的环境。列表按模块组织，并将持续扩充。
 
