@@ -1,0 +1,142 @@
+"""Generate README.md and README_zh.md from data/*.json.
+
+Usage: python3 scripts/build_readme.py
+"""
+import json
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+
+MODULES = [
+    {
+        "file": "environment_synthesis.json",
+        "anchor": "environment-synthesis",
+        "title_en": "Environment Synthesis",
+        "title_zh": "环境合成（Environment Synthesis）",
+        "desc_en": (
+            "Works that **automatically or semi-automatically synthesize interactive, verifiable environments** "
+            "(state, tools/actions, tasks, rewards/verifiers) for agent RL or trajectory collection. "
+            "Hand-built static benchmarks are excluded."
+        ),
+        "desc_zh": (
+            "收录**自动或半自动合成可交互、可验证环境**（状态、工具/动作空间、任务、奖励/验证器）的工作，"
+            "环境用于 Agent 强化学习或轨迹采集。纯人工搭建的静态评测集不收录。"
+        ),
+    },
+]
+
+DOMAIN_ZH = {
+    "Tool & API": "工具与 API",
+    "SWE": "软件工程",
+    "Terminal": "终端",
+    "Web & GUI": "Web 与 GUI",
+    "Game & Embodied": "游戏与具身",
+    "Reasoning": "推理谜题",
+}
+
+TEXT = {
+    "en": {
+        "file": "README.md",
+        "switch": "**English** | [简体中文](README_zh.md)",
+        "intro": (
+            "A curated list of **data for LLM post-training**: datasets, data synthesis methods, and the "
+            "environments that generate them. The list is organized into modules and will grow over time."
+        ),
+        "contents": "Contents",
+        "modules": "Modules",
+        "header": "| Name | Domain | Date | Venue | Scale | Links | Summary |",
+        "contrib_title": "Contributing",
+        "contrib": (
+            "Contributions are welcome! Please edit the JSON files under [`data/`](data/) and run "
+            "`python3 scripts/build_readme.py` to regenerate both READMEs. See [CONTRIBUTING.md](CONTRIBUTING.md)."
+        ),
+        "note": "Entries are sorted by first arXiv submission date (newest first).",
+        "license_title": "License",
+        "license": "[CC0 1.0](LICENSE)",
+    },
+    "zh": {
+        "file": "README_zh.md",
+        "switch": "[English](README.md) | **简体中文**",
+        "intro": (
+            "一个关于**大模型后训练数据**的精选列表：涵盖数据集、数据合成方法，以及用于产生数据的环境。"
+            "列表按模块组织，并将持续扩充。"
+        ),
+        "contents": "目录",
+        "modules": "模块",
+        "header": "| 名称 | 领域 | 日期 | 发表 | 规模 | 链接 | 简介 |",
+        "contrib_title": "贡献",
+        "contrib": (
+            "欢迎贡献！请编辑 [`data/`](data/) 下的 JSON 文件，并运行 `python3 scripts/build_readme.py` "
+            "重新生成中英文 README。详见 [CONTRIBUTING.md](CONTRIBUTING.md)。"
+        ),
+        "note": "条目按 arXiv 首次提交日期倒序排列。",
+        "license_title": "许可",
+        "license": "[CC0 1.0](LICENSE)",
+    },
+}
+
+
+def esc(s: str) -> str:
+    return s.replace("|", "\\|")
+
+
+def row(e: dict, lang: str) -> str:
+    name = f"[**{esc(e['name'])}**](https://arxiv.org/abs/{e['arxiv']} \"{esc(e['title'])}\")"
+    domain = e["domain"] if lang == "en" else DOMAIN_ZH[e["domain"]]
+    links = [f"[![arXiv](https://img.shields.io/badge/arXiv-{e['arxiv'].replace('-', '--')}-b31b1b)](https://arxiv.org/abs/{e['arxiv']})"]
+    if e.get("code"):
+        links.append(f"[![Code](https://img.shields.io/badge/Code-black?logo=github)]({e['code']})")
+    if e.get("data"):
+        links.append(f"[![Data](https://img.shields.io/badge/Data-yellow?logo=huggingface)]({e['data']})")
+    scale = e.get(f"scale_{lang}") or "-"
+    cells = [name, domain, e["date"], esc(e["venue"]), esc(scale), " ".join(links), esc(e[f"summary_{lang}"])]
+    return "| " + " | ".join(cells) + " |"
+
+
+def build(lang: str) -> str:
+    t = TEXT[lang]
+    out = [
+        "# Awesome Post-Training Data",
+        "",
+        "[![Awesome](https://awesome.re/badge.svg)](https://awesome.re)",
+        "",
+        t["switch"],
+        "",
+        t["intro"],
+        "",
+        f"## {t['contents']}",
+        "",
+    ]
+    for m in MODULES:
+        out.append(f"- [{m['title_' + lang]}](#{m['anchor']})")
+    out += [f"- [{t['contrib_title']}](#{t['contrib_title'].lower()})", ""]
+
+    for m in MODULES:
+        entries = json.loads((ROOT / "data" / m["file"]).read_text(encoding="utf-8"))
+        entries.sort(key=lambda e: (e["date"], e["arxiv"]), reverse=True)
+        out += [
+            f'<a id="{m["anchor"]}"></a>',
+            f"## {m['title_' + lang]}",
+            "",
+            m["desc_" + lang],
+            "",
+            f"> {t['note']}",
+            "",
+            t["header"],
+            "|---|---|---|---|---|---|---|",
+        ]
+        out += [row(e, lang) for e in entries]
+        out.append("")
+
+    out += [f"## {t['contrib_title']}", "", t["contrib"], "", f"## {t['license_title']}", "", t["license"], ""]
+    return "\n".join(out)
+
+
+def main() -> None:
+    for lang in ("en", "zh"):
+        (ROOT / TEXT[lang]["file"]).write_text(build(lang), encoding="utf-8")
+        print("wrote", TEXT[lang]["file"])
+
+
+if __name__ == "__main__":
+    main()
