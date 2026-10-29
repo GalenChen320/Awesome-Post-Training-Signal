@@ -102,7 +102,9 @@
 (function () {
   const D = JSON.parse(document.getElementById("data").textContent);
   const COLORS = { "Tool & API": "#2563eb", "SWE": "#16a34a", "Terminal": "#64748b",
-                   "Web & GUI": "#9333ea", "Game & Embodied": "#ea580c", "Reasoning": "#db2777" };
+                   "Web & GUI": "#9333ea", "Game & Embodied": "#ea580c", "Reasoning": "#db2777",
+                   "Math": "#0891b2", "Science": "#65a30d", "General Reasoning": "#c026d3", "Code": "#15803d",
+                   "Formal Proof": "#b45309", "Instruction Following": "#4f46e5", "Verifier": "#dc2626" };
   const saved = localStorage.getItem("lang");
   const state = {
     lang: saved || ((navigator.language || "").toLowerCase().startsWith("zh") ? "zh" : "en"),

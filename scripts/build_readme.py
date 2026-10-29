@@ -26,6 +26,21 @@ MODULES = [
             "环境用于 Agent 强化学习或轨迹采集。纯人工搭建的静态评测集不收录。"
         ),
     },
+    {
+        "file": "verifiable_rewards.json",
+        "slug": "verifiable-rewards",
+        "title_en": "Verifiable Rewards",
+        "title_zh": "可验证奖励（Verifiable Rewards）",
+        "desc_en": (
+            "Works that obtain rewards **checkable by programs, rules or formal systems**: verifiable task datasets "
+            "(math, code, proofs, science, instruction constraints), methods to synthesize answers, test cases or "
+            "checkers, and the design of verifiers themselves. Learned reward models and LLM judges are excluded."
+        ),
+        "desc_zh": (
+            "收录奖励**可由程序、规则或形式系统自动校验**的工作：可验证任务数据集（数学、代码、证明、科学、指令约束），"
+            "合成答案、测试用例或检查器的方法，以及验证器本身的设计。训练得到的奖励模型与 LLM 评判不在此列。"
+        ),
+    },
 ]
 
 DOMAIN_ZH = {
@@ -35,6 +50,13 @@ DOMAIN_ZH = {
     "Web & GUI": "Web 与 GUI",
     "Game & Embodied": "游戏与具身",
     "Reasoning": "推理谜题",
+    "Math": "数学",
+    "Science": "科学",
+    "General Reasoning": "通用推理",
+    "Code": "代码",
+    "Formal Proof": "形式化证明",
+    "Instruction Following": "指令遵循",
+    "Verifier": "验证器",
 }
 
 TEXT = {
