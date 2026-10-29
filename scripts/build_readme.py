@@ -1,8 +1,11 @@
-"""Generate README.md / README_zh.md and per-topic pages (topics/*.md) from data/*.json.
+"""Generate README.md / README_zh.md, per-topic pages (topics/*.md) and the website (docs/index.html)
+from data/*.json.
 
 Usage: python3 scripts/build_readme.py
 """
+import html
 import json
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -188,6 +191,68 @@ def build_topic(m: dict, lang: str, entries: list) -> str:
     return "\n".join(out)
 
 
+def md_inline(s: str) -> str:
+    """Tiny Markdown-to-HTML for intro/description text (bold, italic, links, code)."""
+    s = html.escape(s, quote=False)
+    s = re.sub(r"\*\*\*(.+?)\*\*\*", r"<strong><em>\1</em></strong>", s)
+    s = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", s)
+    s = re.sub(r"\*(.+?)\*", r"<em>\1</em>", s)
+    s = re.sub(r"`(.+?)`", r"<code>\1</code>", s)
+    s = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r'<a href="\2">\1</a>', s)
+    return s
+
+
+SITE_TEXT = {
+    "en": {
+        "search": "Search name, title, affiliation, summary ...",
+        "all": "All",
+        "none": "No matching papers.",
+        "showing": "Showing {n} / {m} papers",
+        "aff": "Affiliations (up to three)",
+        "footer": "Generated from [`data/`](https://github.com/GalenChen320/Awesome-Post-Training-Signal/tree/main/data). "
+                  "Contributions welcome on [GitHub](https://github.com/GalenChen320/Awesome-Post-Training-Signal). License: CC0 1.0.",
+    },
+    "zh": {
+        "search": "搜索名称、标题、单位、简介……",
+        "all": "全部",
+        "none": "没有匹配的论文。",
+        "showing": "显示 {n} / {m} 篇",
+        "aff": "单位（至多三个）",
+        "footer": "由 [`data/`](https://github.com/GalenChen320/Awesome-Post-Training-Signal/tree/main/data) 自动生成。"
+                  "欢迎在 [GitHub](https://github.com/GalenChen320/Awesome-Post-Training-Signal) 上贡献。许可：CC0 1.0。",
+    },
+}
+
+
+def build_site(data: dict) -> str:
+    payload = {
+        "domain_zh": DOMAIN_ZH,
+        "i18n": {
+            lang: {
+                **{k: v for k, v in SITE_TEXT[lang].items() if k != "footer"},
+                "tagline": TEXT[lang]["tagline"],
+                "intro_html": md_inline(TEXT[lang]["intro"]),
+                "footer_html": md_inline(SITE_TEXT[lang]["footer"]),
+            }
+            for lang in ("en", "zh")
+        },
+        "modules": [
+            {
+                "slug": m["slug"],
+                "title_en": m["title_en"],
+                "title_zh": m["title_zh"],
+                "desc_en_html": md_inline(m["desc_en"]),
+                "desc_zh_html": md_inline(m["desc_zh"]),
+                "entries": data[m["slug"]],
+            }
+            for m in MODULES
+        ],
+    }
+    blob = json.dumps(payload, ensure_ascii=False).replace("</", "<\\/")
+    template = (ROOT / "scripts" / "site_template.html").read_text(encoding="utf-8")
+    return template.replace("__DATA__", blob)
+
+
 def write(rel: str, content: str) -> None:
     p = ROOT / rel
     p.parent.mkdir(parents=True, exist_ok=True)
@@ -201,6 +266,8 @@ def main() -> None:
         write(f"README{TEXT[lang]['suffix']}.md", build_main(lang, data))
         for m in MODULES:
             write(topic_path(m, lang), build_topic(m, lang, data[m["slug"]]))
+    write("docs/index.html", build_site(data))
+    write("docs/.nojekyll", "")
 
 
 if __name__ == "__main__":

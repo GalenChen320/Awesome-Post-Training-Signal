@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Awesome Post-Training Signal</title>
+<meta name="description" content="A curated list of works on obtaining LLM post-training signals.">
+<style>
+  :root {
+    --bg: #f7f8fa; --card: #ffffff; --fg: #1f2328; --muted: #656d76; --border: #d8dee4;
+    --accent: #0969da; --shadow: 0 1px 2px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.04);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0d1117; --card: #161b22; --fg: #e6edf3; --muted: #8d96a0; --border: #30363d;
+            --accent: #4493f8; --shadow: none; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); line-height: 1.6;
+         font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB",
+               "Microsoft YaHei", Helvetica, Arial, sans-serif; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+  header { text-align: center; padding: 56px 0 28px; }
+  header h1 { margin: 0; font-size: clamp(28px, 5vw, 44px); letter-spacing: -.02em; }
+  .tagline { margin: 8px 0 0; color: var(--muted); font-style: italic; font-size: 17px; }
+  .topbar { display: flex; justify-content: flex-end; gap: 10px; padding-top: 16px; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border: 1px solid var(--border);
+         border-radius: 8px; background: var(--card); color: var(--fg); font-size: 13px; cursor: pointer; }
+  .btn:hover { border-color: var(--accent); text-decoration: none; }
+  .btn svg { width: 16px; height: 16px; fill: currentColor; }
+  .intro { max-width: 860px; margin: 20px auto 0; color: var(--fg); }
+
+  nav.toc { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+  nav.toc a { font-size: 14px; padding: 2px 10px; border-radius: 999px; border: 1px solid var(--border); background: var(--card); }
+
+  .controls { position: sticky; top: 0; z-index: 10; background: var(--bg); padding: 14px 0 10px;
+              border-bottom: 1px solid var(--border); }
+  .search { width: 100%; padding: 10px 14px; font-size: 15px; border-radius: 10px; border: 1px solid var(--border);
+            background: var(--card); color: var(--fg); outline: none; }
+  .search:focus { border-color: var(--accent); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .chip { padding: 3px 12px; border-radius: 999px; border: 1px solid var(--border); background: var(--card);
+          color: var(--fg); font-size: 13px; cursor: pointer; }
+  .chip .n { color: var(--muted); margin-left: 4px; }
+  .chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .chip.on .n { color: rgba(255,255,255,.8); }
+  .count { margin-top: 8px; font-size: 13px; color: var(--muted); }
+
+  section { padding-top: 28px; }
+  section h2 { margin: 0 0 4px; font-size: 24px; }
+  .desc { margin: 0 0 16px; color: var(--muted); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px;
+          box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 6px; }
+  .card:hover { border-color: var(--accent); }
+  .meta { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--muted); }
+  .tag { --c: #57606a; padding: 1px 9px; border-radius: 999px; font-weight: 600; color: var(--c);
+         background: color-mix(in srgb, var(--c) 14%, transparent); }
+  .card h3 { margin: 2px 0 0; font-size: 17px; }
+  .ptitle { margin: 0; font-size: 13px; color: var(--muted); }
+  .aff { margin: 0; font-size: 13px; }
+  .sum { margin: 2px 0 0; font-size: 14px; flex: 1; }
+  .links { display: flex; gap: 6px; margin-top: 6px; }
+  .pill { font-size: 12px; padding: 1px 10px; border-radius: 6px; border: 1px solid var(--border); color: var(--fg); }
+  .pill:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
+  .empty { color: var(--muted); font-style: italic; }
+
+  footer { margin: 48px 0 32px; text-align: center; font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <button class="btn" id="lang-btn" type="button"></button>
+    <a class="btn" href="https://github.com/GalenChen320/Awesome-Post-Training-Signal" target="_blank" rel="noopener">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      GitHub
+    </a>
+  </div>
+  <header>
+    <h1>Awesome Post-Training Signal</h1>
+    <p class="tagline" id="tagline"></p>
+    <p class="intro" id="intro"></p>
+    <nav class="toc" id="toc"></nav>
+  </header>
+
+  <div class="controls">
+    <input class="search" id="search" type="search" autocomplete="off">
+    <div class="chips" id="chips"></div>
+    <div class="count" id="count"></div>
+  </div>
+
+  <main id="main"></main>
+
+  <footer id="footer"></footer>
+</div>
+
+<script type="application/json" id="data">__DATA__</script>
+<script>
+(function () {
+  const D = JSON.parse(document.getElementById("data").textContent);
+  const COLORS = { "Tool & API": "#2563eb", "SWE": "#16a34a", "Terminal": "#64748b",
+                   "Web & GUI": "#9333ea", "Game & Embodied": "#ea580c", "Reasoning": "#db2777" };
+  const saved = localStorage.getItem("lang");
+  const state = {
+    lang: saved || ((navigator.language || "").toLowerCase().startsWith("zh") ? "zh" : "en"),
+    q: "",
+    domain: "all",
+  };
+  const all = D.modules.flatMap(m => m.entries);
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const domainLabel = d => state.lang === "zh" ? D.domain_zh[d] : d;
+  const haystack = e => [e.name, e.title, e.domain, D.domain_zh[e.domain], e.affiliations.join(" "),
+                         e.summary_en, e.summary_zh].join(" ").toLowerCase();
+
+  function matches(e) {
+    if (state.domain !== "all" && e.domain !== state.domain) return false;
+    const terms = state.q.toLowerCase().split(/\s+/).filter(Boolean);
+    const h = haystack(e);
+    return terms.every(t => h.includes(t));
+  }
+
+  function card(e) {
+    const t = D.i18n[state.lang];
+    const links = [`<a class="pill" href="https://arxiv.org/abs/${esc(e.arxiv)}" target="_blank" rel="noopener">arXiv</a>`];
+    if (e.code) links.push(`<a class="pill" href="${esc(e.code)}" target="_blank" rel="noopener">Code</a>`);
+    if (e.data) links.push(`<a class="pill" href="${esc(e.data)}" target="_blank" rel="noopener">Data</a>`);
+    const aff = e.affiliations.length ? e.affiliations.map(esc).join(" · ") : "-";
+    return `<article class="card">
+      <div class="meta"><span class="tag" style="--c:${COLORS[e.domain] || "#57606a"}">${esc(domainLabel(e.domain))}</span><span>${esc(e.date)}</span></div>
+      <h3><a href="https://arxiv.org/abs/${esc(e.arxiv)}" target="_blank" rel="noopener">${esc(e.name)}</a></h3>
+      <p class="ptitle">${esc(e.title)}</p>
+      <p class="aff" title="${esc(t.aff)}">${aff}</p>
+      <p class="sum">${esc(e["summary_" + state.lang])}</p>
+      <div class="links">${links.join("")}</div>
+    </article>`;
+  }
+
+  function render() {
+    const t = D.i18n[state.lang];
+    document.documentElement.lang = state.lang === "zh" ? "zh-CN" : "en";
+    document.getElementById("lang-btn").textContent = state.lang === "zh" ? "English" : "中文";
+    document.getElementById("tagline").textContent = t.tagline;
+    document.getElementById("intro").innerHTML = t.intro_html;
+    document.getElementById("footer").innerHTML = t.footer_html;
+    const search = document.getElementById("search");
+    search.placeholder = t.search;
+    if (search.value !== state.q) search.value = state.q;
+
+    document.getElementById("toc").innerHTML = D.modules
+      .map(m => `<a href="#${esc(m.slug)}">${esc(m["title_" + state.lang])}</a>`).join("");
+
+    const counts = {};
+    all.forEach(e => { counts[e.domain] = (counts[e.domain] || 0) + 1; });
+    const domains = Object.keys(D.domain_zh).filter(d => counts[d]);
+    document.getElementById("chips").innerHTML =
+      `<button type="button" class="chip ${state.domain === "all" ? "on" : ""}" data-d="all">${esc(t.all)}<span class="n">${all.length}</span></button>` +
+      domains.map(d => `<button type="button" class="chip ${state.domain === d ? "on" : ""}" data-d="${esc(d)}">${esc(domainLabel(d))}<span class="n">${counts[d]}</span></button>`).join("");
+
+    let shown = 0;
+    document.getElementById("main").innerHTML = D.modules.map(m => {
+      const list = m.entries.filter(matches);
+      shown += list.length;
+      return `<section id="${esc(m.slug)}">
+        <h2>${esc(m["title_" + state.lang])}</h2>
+        <p class="desc">${m["desc_" + state.lang + "_html"]}</p>
+        ${list.length ? `<div class="grid">${list.map(card).join("")}</div>` : `<p class="empty">${esc(t.none)}</p>`}
+      </section>`;
+    }).join("");
+    document.getElementById("count").textContent = t.showing.replace("{n}", shown).replace("{m}", all.length);
+  }
+
+  document.getElementById("lang-btn").addEventListener("click", () => {
+    state.lang = state.lang === "zh" ? "en" : "zh";
+    localStorage.setItem("lang", state.lang);
+    render();
+  });
+  document.getElementById("search").addEventListener("input", ev => { state.q = ev.target.value; render(); });
+  document.getElementById("chips").addEventListener("click", ev => {
+    const b = ev.target.closest(".chip");
+    if (!b) return;
+    state.domain = b.dataset.d;
+    render();
+  });
+  render();
+})();
+</script>
+</body>
+</html>
