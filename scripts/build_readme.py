@@ -1,4 +1,4 @@
-"""Generate README.md and README_zh.md from data/*.json.
+"""Generate README.md / README_zh.md and per-topic pages (topics/*.md) from data/*.json.
 
 Usage: python3 scripts/build_readme.py
 """
@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parent.parent
 MODULES = [
     {
         "file": "environment_synthesis.json",
-        "anchor": "environment-synthesis",
+        "slug": "environment-synthesis",
         "title_en": "Environment Synthesis",
         "title_zh": "环境合成（Environment Synthesis）",
         "desc_en": (
@@ -36,8 +36,9 @@ DOMAIN_ZH = {
 
 TEXT = {
     "en": {
-        "file": "README.md",
-        "switch": '<b>English</b> | <a href="README_zh.md">简体中文</a>',
+        "suffix": "",
+        "other_suffix": "_zh",
+        "switch": '<b>English</b> | <a href="{other}">简体中文</a>',
         "tagline": "Where do post-training signals come from?",
         "intro": (
             "LLM post-training mainly consumes three kinds of signals: **demonstrations** (what a good response "
@@ -47,20 +48,23 @@ TEXT = {
             "algorithms)."
         ),
         "contents": "Contents",
-        "modules": "Modules",
-        "header": "| Name | Domain | Date | Links | Summary |",
+        "cols_main": ["Name", "Domain", "Date", "Affiliations", "Links"],
+        "cols_topic": ["Name", "Domain", "Date", "Affiliations", "Links", "Summary"],
+        "detail": "Full list with summaries",
+        "back": "Back to main page",
         "contrib_title": "Contributing",
         "contrib": (
             "Contributions are welcome! Please edit the JSON files under [`data/`](data/) and run "
-            "`python3 scripts/build_readme.py` to regenerate both READMEs. See [CONTRIBUTING.md](CONTRIBUTING.md)."
+            "`python3 scripts/build_readme.py` to regenerate all pages. See [CONTRIBUTING.md](CONTRIBUTING.md)."
         ),
-        "note": "Entries are sorted by first arXiv submission date (newest first).",
+        "note": "Entries are sorted by first arXiv submission date (newest first). Up to three affiliations are listed per paper.",
         "license_title": "License",
         "license": "[CC0 1.0](LICENSE)",
     },
     "zh": {
-        "file": "README_zh.md",
-        "switch": '<a href="README.md">English</a> | <b>简体中文</b>',
+        "suffix": "_zh",
+        "other_suffix": "",
+        "switch": '<a href="{other}">English</a> | <b>简体中文</b>',
         "tagline": "后训练的信号从哪里来？",
         "intro": (
             "大语言模型后训练主要消耗三类信号：**示范**（好的回答长什么样）、**偏好**（哪个回答更好）、"
@@ -68,14 +72,16 @@ TEXT = {
             "验证器、评判器等）；不收录*如何消费这些信号*的工作（如训练算法等）。"
         ),
         "contents": "目录",
-        "modules": "模块",
-        "header": "| 名称 | 领域 | 日期 | 链接 | 简介 |",
+        "cols_main": ["名称", "领域", "日期", "单位", "链接"],
+        "cols_topic": ["名称", "领域", "日期", "单位", "链接", "简介"],
+        "detail": "查看含简介的完整列表",
+        "back": "返回主页",
         "contrib_title": "贡献",
         "contrib": (
             "欢迎贡献！请编辑 [`data/`](data/) 下的 JSON 文件，并运行 `python3 scripts/build_readme.py` "
-            "重新生成中英文 README。详见 [CONTRIBUTING.md](CONTRIBUTING.md)。"
+            "重新生成所有页面。详见 [CONTRIBUTING.md](CONTRIBUTING.md)。"
         ),
-        "note": "条目按 arXiv 首次提交日期倒序排列。",
+        "note": "条目按 arXiv 首次提交日期倒序排列；每篇论文至多列出前三个单位。",
         "license_title": "许可",
         "license": "[CC0 1.0](LICENSE)",
     },
@@ -86,22 +92,39 @@ def esc(s: str) -> str:
     return s.replace("|", "\\|")
 
 
-def row(e: dict, lang: str) -> str:
+def load(m: dict) -> list:
+    entries = json.loads((ROOT / "data" / m["file"]).read_text(encoding="utf-8"))
+    entries.sort(key=lambda e: (e["date"], e["arxiv"]), reverse=True)
+    return entries
+
+
+def row(e: dict, lang: str, with_summary: bool) -> str:
     name = f"[**{esc(e['name'])}**](https://arxiv.org/abs/{e['arxiv']} \"{esc(e['title'])}\")"
     domain = e["domain"] if lang == "en" else DOMAIN_ZH[e["domain"]]
-    links = [f"[![arXiv](https://img.shields.io/badge/arXiv-{e['arxiv'].replace('-', '--')}-b31b1b)](https://arxiv.org/abs/{e['arxiv']})"]
+    affs = "<br>".join(esc(a) for a in e.get("affiliations", [])[:3]) or "-"
+    links = [f"[![arXiv](https://img.shields.io/badge/arXiv-{e['arxiv']}-b31b1b)](https://arxiv.org/abs/{e['arxiv']})"]
     if e.get("code"):
         links.append(f"[![Code](https://img.shields.io/badge/Code-black?logo=github)]({e['code']})")
     if e.get("data"):
         links.append(f"[![Data](https://img.shields.io/badge/Data-yellow?logo=huggingface)]({e['data']})")
-    cells = [name, domain, e["date"], " ".join(links), esc(e[f"summary_{lang}"])]
+    cells = [name, domain, e["date"], affs, " ".join(links)]
+    if with_summary:
+        cells.append(esc(e[f"summary_{lang}"]))
     return "| " + " | ".join(cells) + " |"
 
 
-def build(lang: str) -> str:
+def table(entries: list, lang: str, with_summary: bool) -> list:
+    cols = TEXT[lang]["cols_topic" if with_summary else "cols_main"]
+    return ["| " + " | ".join(cols) + " |", "|" + "---|" * len(cols)] + [row(e, lang, with_summary) for e in entries]
+
+
+def topic_path(m: dict, lang: str) -> str:
+    return f"topics/{m['slug']}{TEXT[lang]['suffix']}.md"
+
+
+def header(lang: str, other_href: str, prefix: str, total: int) -> list:
     t = TEXT[lang]
-    total = sum(len(json.loads((ROOT / "data" / m["file"]).read_text(encoding="utf-8"))) for m in MODULES)
-    out = [
+    return [
         '<div align="center">',
         "",
         "<h1>Awesome Post-Training Signal</h1>",
@@ -110,47 +133,74 @@ def build(lang: str) -> str:
         "",
         '<a href="https://awesome.re"><img src="https://awesome.re/badge.svg" alt="Awesome"></a>',
         f'<img src="https://img.shields.io/badge/papers-{total}-blue" alt="Papers">',
-        '<a href="LICENSE"><img src="https://img.shields.io/badge/license-CC0%201.0-lightgrey" alt="License"></a>',
-        '<a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen" alt="PRs Welcome"></a>',
+        f'<a href="{prefix}LICENSE"><img src="https://img.shields.io/badge/license-CC0%201.0-lightgrey" alt="License"></a>',
+        f'<a href="{prefix}CONTRIBUTING.md"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen" alt="PRs Welcome"></a>',
         "",
-        f"<p>{t['switch']}</p>",
+        f"<p>{t['switch'].format(other=other_href)}</p>",
         "",
         "</div>",
         "",
-        t["intro"],
-        "",
-        f"## {t['contents']}",
-        "",
     ]
+
+
+def build_main(lang: str, data: dict) -> str:
+    t = TEXT[lang]
+    total = sum(len(v) for v in data.values())
+    out = header(lang, f"README{t['other_suffix']}.md", "", total)
+    out += [t["intro"], "", f"## {t['contents']}", ""]
     for m in MODULES:
-        out.append(f"- [{m['title_' + lang]}](#{m['anchor']})")
+        out.append(f"- [{m['title_' + lang]}](#{m['slug']})")
     out += [f"- [{t['contrib_title']}](#{t['contrib_title'].lower()})", ""]
 
     for m in MODULES:
-        entries = json.loads((ROOT / "data" / m["file"]).read_text(encoding="utf-8"))
-        entries.sort(key=lambda e: (e["date"], e["arxiv"]), reverse=True)
         out += [
-            f'<a id="{m["anchor"]}"></a>',
+            f'<a id="{m["slug"]}"></a>',
             f"## {m['title_' + lang]}",
             "",
             m["desc_" + lang],
             "",
-            f"> {t['note']}",
+            f"> {t['note']} **[{t['detail']} →]({topic_path(m, lang)})**",
             "",
-            t["header"],
-            "|---|---|---|---|---|",
         ]
-        out += [row(e, lang) for e in entries]
+        out += table(data[m["slug"]], lang, with_summary=False)
         out.append("")
 
     out += [f"## {t['contrib_title']}", "", t["contrib"], "", f"## {t['license_title']}", "", t["license"], ""]
     return "\n".join(out)
 
 
+def build_topic(m: dict, lang: str, entries: list) -> str:
+    t = TEXT[lang]
+    other = Path(topic_path(m, "zh" if lang == "en" else "en")).name
+    out = header(lang, other, "../", len(entries))
+    out += [
+        f"## {m['title_' + lang]}",
+        "",
+        f"[← {t['back']}](../README{t['suffix']}.md)",
+        "",
+        m["desc_" + lang],
+        "",
+        f"> {t['note']}",
+        "",
+    ]
+    out += table(entries, lang, with_summary=True)
+    out.append("")
+    return "\n".join(out)
+
+
+def write(rel: str, content: str) -> None:
+    p = ROOT / rel
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(content, encoding="utf-8")
+    print("wrote", rel)
+
+
 def main() -> None:
+    data = {m["slug"]: load(m) for m in MODULES}
     for lang in ("en", "zh"):
-        (ROOT / TEXT[lang]["file"]).write_text(build(lang), encoding="utf-8")
-        print("wrote", TEXT[lang]["file"])
+        write(f"README{TEXT[lang]['suffix']}.md", build_main(lang, data))
+        for m in MODULES:
+            write(topic_path(m, lang), build_topic(m, lang, data[m["slug"]]))
 
 
 if __name__ == "__main__":
